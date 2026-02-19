@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GCSE Exam Countdown 2026</title>
   <style>
     body {
@@ -62,7 +62,7 @@
       // === AQA ===
       {date:'2026-05-11', name:'English Literature Paper 1', board:'AQA'},
       {date:'2026-05-12', name:'Biology Paper 1', board:'AQA'},
-      {date:'2026-05-14', name:'Maths Paper 1 (Non‑Calculator)', board:'AQA'},
+      {date:'2026-05-14', name:'Maths Paper 1 (Non-Calculator)', board:'AQA'},
       {date:'2026-05-18', name:'Chemistry Paper 1', board:'AQA'},
       {date:'2026-05-19', name:'English Literature Paper 2', board:'AQA'},
       {date:'2026-05-21', name:'English Language Paper 1', board:'AQA'},
@@ -90,28 +90,47 @@
       {date:'2026-05-21', name:'Business Paper 2', board:'Edexcel'}
     ];
 
+    // Return number of days between today and exam:
+    // positive => days until; 0 => today; negative => days since (passed)
     function daysUntil(dateStr){
-      const now = new Date();
+      const today = new Date();
+      today.setHours(0,0,0,0); // normalize to midnight local
       const exam = new Date(dateStr + 'T00:00:00');
-      const diff = Math.ceil((exam - now)/(1000*60*60*24));
-      return diff < 0 ? 0 : diff;
+      exam.setHours(0,0,0,0);
+      const msPerDay = 1000 * 60 * 60 * 24;
+      return Math.round((exam - today) / msPerDay);
     }
 
     function friendlyDate(dateStr){
       const d = new Date(dateStr + 'T00:00:00');
-      return d.toLocaleDateString(undefined,{weekday:'short', day:'numeric', month:'short', year:'numeric'});
+      return d.toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short', year:'numeric' });
     }
 
     function renderExams(){
-      exams.sort((a,b)=> new Date(a.date) - new Date(b.date));
+      // sort by date ascending
+      exams.sort((a,b) => new Date(a.date) - new Date(b.date));
+
       const tbody = document.getElementById('desktopTable');
       const cards = document.getElementById('mobileCards');
       tbody.innerHTML = '';
       cards.innerHTML = '';
 
-      exams.forEach(e=>{
-        const diff = daysUntil(e.date);
-        const cls = (new Date(e.date).toDateString()===new Date().toDateString()) ? 'today' : (diff===0 ? 'past' : 'upcoming');
+      exams.forEach(e => {
+        const diff = daysUntil(e.date); // can be negative, zero or positive
+        let cls;
+        if (diff === 0) cls = 'today';
+        else if (diff < 0) cls = 'past';
+        else cls = 'upcoming';
+
+        // Determine display text for days column
+        let daysText;
+        if (diff > 0) {
+          daysText = diff; // number of days until
+        } else if (diff === 0) {
+          daysText = 'Today';
+        } else {
+          daysText = `Passed ${Math.abs(diff)}d`;
+        }
 
         // Desktop table row
         const tr = document.createElement('tr');
@@ -120,13 +139,21 @@
           <td>${friendlyDate(e.date)}</td>
           <td>${e.name}</td>
           <td>${e.board}</td>
-          <td>${diff}</td>
+          <td>${daysText}</td>
         `;
         tbody.appendChild(tr);
 
         // Mobile card
         const card = document.createElement('div');
         card.className = 'card ' + cls;
+
+        // Mobile meta label below the big days number
+        let mobileMeta;
+        if (diff > 0) mobileMeta = 'days';
+        else if (diff === 0) mobileMeta = 'Today';
+        else mobileMeta = `${Math.abs(diff)} days ago`;
+
+        // Show numeric days for upcoming, 'Today' for today, and "Passed X days ago" for past
         card.innerHTML = `
           <div class="row">
             <div>
@@ -134,8 +161,8 @@
               <div class="meta">${e.board} • ${friendlyDate(e.date)}</div>
             </div>
             <div style="text-align:right">
-              <div class="days ${cls}">${diff}</div>
-              <div class="meta">${diff === 0 ? 'Today / Passed' : 'days'}</div>
+              <div class="days ${cls}">${diff > 0 ? diff : (diff === 0 ? 'Today' : Math.abs(diff))}</div>
+              <div class="meta">${mobileMeta}</div>
             </div>
           </div>
         `;
@@ -143,8 +170,9 @@
       });
     }
 
-    render();
-    setInterval(render, 1000*60*60); // refresh every hour
+    // initial render and periodic refresh
+    renderExams();
+    setInterval(renderExams, 1000 * 60 * 60); // refresh every hour
   </script>
 </body>
 </html>
