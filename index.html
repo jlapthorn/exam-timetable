@@ -1,246 +1,98 @@
-#test
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GCSE Pro Countdown 2026</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --accent: #38bdf8;
-      --text: #f1f5f9;
-      --text-dim: #94a3b8;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    .container { max-width: 900px; margin: 0 auto; }
-
-    header { text-align: center; margin-bottom: 2rem; }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
-    
-    /* Progress Bar */
-    .progress-container {
-      background: rgba(255,255,255,0.1);
-      border-radius: 20px;
-      height: 8px;
-      margin: 20px 0;
-      overflow: hidden;
-    }
-    #progressBar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--success));
-      width: 0%;
-      transition: width 1s ease-in-out;
-    }
-
-    /* Controls */
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-      justify-content: center;
-    }
-
-    input[type="text"] {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      flex-grow: 1;
-    }
-
-    .filter-btn {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: var(--text-dim);
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .filter-btn.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-    }
-
-    /* Grid/Cards */
-    .exam-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .exam-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.05);
-      padding: 16px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform 0.2s;
-    }
-
-    .exam-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
-    
-    .exam-info .name { font-weight: 700; font-size: 1.1rem; }
-    .exam-info .details { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
-    
-    .countdown { text-align: right; min-width: 80px; }
-    .countdown .num { font-size: 1.4rem; font-weight: 800; display: block; }
-    .countdown .label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); }
-
-    /* States */
-    .status-past { opacity: 0.4; filter: grayscale(1); }
-    .status-today { border: 2px solid var(--warning); background: rgba(245, 158, 11, 0.05); }
-    .status-today .num { color: var(--warning); }
-    .status-upcoming .num { color: var(--success); }
-
-    footer { margin-top: 40px; text-align: center; color: var(--text-dim); font-size: 0.9rem; }
-    
-    @media (max-width: 600px) {
-      .exam-card { flex-direction: column; text-align: center; gap: 15px; }
-      .countdown { text-align: center; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>GCSE Exam Countdown 2026</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
+        th { background: #eee; }
+        .past { color: gray; }
+        .today { color: orange; font-weight: bold; }
+        .upcoming { color: green; }
+    </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <h1>GCSE 2026</h1>
-    <p id="seasonProgressText" style="color: var(--text-dim)">Exam Season Progress</p>
-    <div class="progress-container">
-      <div id="progressBar"></div>
-    </div>
-  </header>
-
-  <div class="controls">
-    <input type="text" id="searchInput" placeholder="Search subjects..." oninput="render()">
-    <button class="filter-btn active" onclick="toggleFilter('AQA', this)">AQA</button>
-    <button class="filter-btn active" onclick="toggleFilter('OCR', this)">OCR</button>
-    <button class="filter-btn active" onclick="toggleFilter('Edexcel', this)">Edexcel</button>
-  </div>
-
-  <div id="examGrid" class="exam-grid"></div>
-
-  <footer>
-    <p>Good luck with your studies! 📚</p>
-  </footer>
-</div>
+<h1>GCSE Exam Countdown 2026</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Exam</th>
+            <th>Board</th>
+            <th>Days Until</th>
+        </tr>
+    </thead>
+    <tbody id="examList"></tbody>
+</table>
 
 <script>
-  const exams = [
-    {date:'2026-05-11', name:'English Literature Paper 1', board:'AQA'},
-    {date:'2026-05-12', name:'Biology Paper 1', board:'AQA'},
-    {date:'2026-05-13', name:'Computer Science Paper 1', board:'OCR'},
-    {date:'2026-05-13', name:'Geography Paper 1', board:'OCR'},
-    {date:'2026-05-14', name:'Maths Paper 1 (Non-Calc)', board:'AQA'},
-    {date:'2026-05-18', name:'Chemistry Paper 1', board:'AQA'},
-    {date:'2026-05-19', name:'English Literature Paper 2', board:'AQA'},
-    {date:'2026-05-19', name:'Computer Science Paper 2', board:'OCR'},
-    {date:'2026-05-11', name:'Business Paper 1', board:'Edexcel'},
-    {date:'2026-05-21', name:'Business Paper 2', board:'Edexcel'},
-    {date:'2026-05-21', name:'English Language Paper 1', board:'AQA'},
-    {date:'2026-06-02', name:'Physics Paper 1', board:'AQA'},
-    {date:'2026-06-03', name:'Maths Paper 2 (Calc)', board:'AQA'},
-    {date:'2026-06-05', name:'English Language Paper 2', board:'AQA'},
-    {date:'2026-06-08', name:'Biology Paper 2', board:'AQA'},
-    {date:'2026-06-10', name:'Maths Paper 3 (Calc)', board:'AQA'},
-    {date:'2026-06-12', name:'Chemistry Paper 2', board:'AQA'},
-    {date:'2026-06-15', name:'Physics Paper 2', board:'AQA'}
-  ];
+const exams = [
+    // AQA Triple Science
+    { date: "2026-05-12", name: "Biology Paper 1", board: "AQA" },
+    { date: "2026-06-08", name: "Biology Paper 2", board: "AQA" },
+    { date: "2026-05-18", name: "Chemistry Paper 1", board: "AQA" },
+    { date: "2026-06-12", name: "Chemistry Paper 2", board: "AQA" },
+    { date: "2026-05-22", name: "Physics Paper 1", board: "AQA" },
+    { date: "2026-06-15", name: "Physics Paper 2", board: "AQA" },
 
-  let activeBoards = ['AQA', 'OCR', 'Edexcel'];
+    // AQA English
+    { date: "2026-05-21", name: "English Language Paper 1", board: "AQA" },
+    { date: "2026-06-05", name: "English Language Paper 2", board: "AQA" },
+    { date: "2026-05-19", name: "English Literature Paper 1", board: "AQA" },
+    { date: "2026-05-19", name: "English Literature Paper 2", board: "AQA" },
 
-  function toggleFilter(board, btn) {
-    if (activeBoards.includes(board)) {
-      activeBoards = activeBoards.filter(b => b !== board);
-      btn.classList.remove('active');
-    } else {
-      activeBoards.push(board);
-      btn.classList.add('active');
-    }
-    render();
-  }
+    // AQA Maths & Further Maths
+    { date: "2026-05-14", name: "Maths Paper 1 (Non‑Calculator)", board: "AQA" },
+    { date: "2026-06-03", name: "Maths Paper 2 (Calculator)", board: "AQA" },
+    { date: "2026-06-10", name: "Maths Paper 3 (Calculator)", board: "AQA" },
+    { date: "2026-06-05", name: "Further Maths Paper 1", board: "AQA" },
+    { date: "2026-06-12", name: "Further Maths Paper 2", board: "AQA" },
 
-  function getDiff(dateStr) {
+    // AQA PE
+    { date: "2026-06-09", name: "PE Paper 1", board: "AQA" },
+    { date: "2026-06-09", name: "PE Paper 2", board: "AQA" }, // Example date
+
+    // OCR Computer Science
+    { date: "2026-05-13", name: "Computer Science Paper 1", board: "OCR" },
+    { date: "2026-05-20", name: "Computer Science Paper 2", board: "OCR" },
+
+    // OCR Geography Type B
+    { date: "2026-05-13", name: "Geography Paper 1", board: "OCR" },
+    { date: "2026-05-21", name: "Geography Paper 2", board: "OCR" },
+    { date: "2026-06-04", name: "Geography Paper 3", board: "OCR" }, // Example
+
+    // Edexcel Business
+    { date: "2026-05-11", name: "Business Paper 1", board: "Edexcel" },
+    { date: "2026-05-19", name: "Business Paper 2", board: "Edexcel" }
+];
+
+// Render table
+function renderExams() {
+    const tbody = document.getElementById("examList");
     const today = new Date();
-    today.setHours(0,0,0,0);
-    const examDate = new Date(dateStr);
-    return Math.round((examDate - today) / (1000 * 60 * 60 * 24));
-  }
+    exams.sort((a,b) => new Date(a.date) - new Date(b.date));
+    tbody.innerHTML = "";
+    exams.forEach(e => {
+        const examDate = new Date(e.date);
+        let diff = Math.ceil((examDate - today)/(1000*60*60*24));
+        if (diff < 0) diff = 0;
+        let cls = diff === 0 ? "today" : (examDate < today ? "past" : "upcoming");
+        const row = document.createElement("tr");
+        row.className = cls;
+        row.innerHTML = `
+            <td>${examDate.toDateString()}</td>
+            <td>${e.name}</td>
+            <td>${e.board}</td>
+            <td>${diff}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
 
-  function render() {
-    const grid = document.getElementById('examGrid');
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    
-    // Sort and Filter
-    const filtered = exams
-      .filter(e => activeBoards.includes(e.board))
-      .filter(e => e.name.toLowerCase().includes(searchTerm))
-      .sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    // Calculate Season Progress
-    const total = exams.length;
-    const passed = exams.filter(e => getDiff(e.date) < 0).length;
-    const percent = Math.round((passed / total) * 100);
-    document.getElementById('progressBar').style.width = percent + '%';
-    document.getElementById('seasonProgressText').innerText = `Exam Season Progress: ${percent}% Complete`;
-
-    grid.innerHTML = filtered.map(e => {
-      const diff = getDiff(e.date);
-      let statusClass = 'status-upcoming';
-      let dayLabel = 'Days Left';
-      let displayDiff = diff;
-
-      if (diff === 0) {
-        statusClass = 'status-today';
-        dayLabel = 'Exam Today';
-        displayDiff = 'NOW';
-      } else if (diff < 0) {
-        statusClass = 'status-past';
-        dayLabel = 'Completed';
-        displayDiff = '✓';
-      }
-
-      const dateDisplay = new Date(e.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-
-      return `
-        <div class="exam-card ${statusClass}">
-          <div class="exam-info">
-            <div class="name">${e.name}</div>
-            <div class="details">${e.board} • ${dateDisplay}</div>
-          </div>
-          <div class="countdown">
-            <span class="num">${displayDiff}</span>
-            <span class="label">${dayLabel}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  render();
+renderExams();
 </script>
 </body>
 </html>
-
-
-
